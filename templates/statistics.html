@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Statistics - Smart Attendance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">
+                <i class="fas fa-chart-bar me-2"></i>Statistics & Analytics
+            </h1>
+        </div>
+    </div>
+    
+    <!-- Charts Row -->
+    <div class="row mb-4">
+        <!-- Daily Attendance Chart -->
+        <div class="col-md-8 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>Daily Attendance (Last 7 Days)
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dailyAttendanceChart" height="100"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course Distribution Chart -->
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>Students by Course
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="courseDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Statistics Tables -->
+    <div class="row">
+        <!-- Daily Statistics -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>Daily Attendance Summary
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if daily_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Attendance</th>
+                                        <th>Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for stat in daily_stats %}
+                                    <tr>
+                                        <td>{{ stat.date.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ stat.count }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 8px;">
+                                                <div class="progress-bar bg-success" 
+                                                     style="width: {{ (stat.count / (daily_stats|map(attribute='count')|max or 1) * 100) }}%"></div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-chart-line fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No attendance data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Course Statistics -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>Course Distribution
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if course_stats %}
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Course</th>
+                                        <th>Students</th>
+                                        <th>Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% set total_students = course_stats|map(attribute='count')|sum %}
+                                    {% for stat in course_stats %}
+                                    <tr>
+                                        <td>{{ stat.course or 'Not Specified' }}</td>
+                                        <td>
+                                            <span class="badge bg-info">{{ stat.count }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="progress me-2" style="width: 60px; height: 8px;">
+                                                    <div class="progress-bar bg-info" 
+                                                         style="width: {{ (stat.count / total_students * 100) if total_students > 0 else 0 }}%"></div>
+                                                </div>
+                                                <small class="text-muted">{{ "%.1f"|format((stat.count / total_students * 100) if total_students > 0 else 0) }}%</small>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-graduation-cap fa-2x text-muted mb-2"></i>
+                            <p class="text-muted">No course data available</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Daily Attendance Chart
+const dailyCtx = document.getElementById('dailyAttendanceChart').getContext('2d');
+const dailyAttendanceChart = new Chart(dailyCtx, {
+    type: 'line',
+    data: {
+        labels: [
+            {% for stat in daily_stats %}
+                '{{ stat.date.strftime("%m/%d") }}'{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            label: 'Attendance',
+            data: [
+                {% for stat in daily_stats %}
+                    {{ stat.count }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            borderColor: 'rgb(54, 162, 235)',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.4,
+            fill: true
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    stepSize: 1
+                }
+            }
+        },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
+    }
+});
+
+// Course Distribution Chart
+const courseCtx = document.getElementById('courseDistributionChart').getContext('2d');
+const courseDistributionChart = new Chart(courseCtx, {
+    type: 'doughnut',
+    data: {
+        labels: [
+            {% for stat in course_stats %}
+                '{{ stat.course or "Not Specified" }}'{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ],
+        datasets: [{
+            data: [
+                {% for stat in course_stats %}
+                    {{ stat.count }}{% if not loop.last %},{% endif %}
+                {% endfor %}
+            ],
+            backgroundColor: [
+                '#FF6384',
+                '#36A2EB',
+                '#FFCE56',
+                '#4BC0C0',
+                '#9966FF',
+                '#FF9F40',
+                '#FF6384',
+                '#C9CBCF'
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom'
+            }
+        }
+    }
+});
+</script>
+{% endblock %}

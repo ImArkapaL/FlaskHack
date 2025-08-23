@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}ID Card - {{ student.full_name }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .id-card {
+        width: 350px;
+        height: 220px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 15px;
+        padding: 20px;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+        font-family: 'Arial', sans-serif;
+    }
+    
+    .id-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        z-index: 1;
+    }
+    
+    .card-content {
+        position: relative;
+        z-index: 2;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .card-header {
+        text-align: center;
+        margin-bottom: 15px;
+    }
+    
+    .institution-name {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .card-title {
+        font-size: 11px;
+        margin: 2px 0 0 0;
+        opacity: 0.9;
+    }
+    
+    .card-body {
+        display: flex;
+        flex: 1;
+        gap: 15px;
+    }
+    
+    .photo-section {
+        flex-shrink: 0;
+    }
+    
+    .student-photo {
+        width: 70px;
+        height: 70px;
+        border-radius: 8px;
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        object-fit: cover;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .info-section {
+        flex: 1;
+        font-size: 12px;
+    }
+    
+    .student-name {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 0 0 8px 0;
+        line-height: 1.2;
+    }
+    
+    .info-row {
+        margin-bottom: 4px;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        opacity: 0.9;
+    }
+    
+    .info-value {
+        opacity: 0.8;
+    }
+    
+    .card-footer {
+        text-align: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        padding-top: 8px;
+        margin-top: 10px;
+    }
+    
+    .footer-text {
+        font-size: 10px;
+        margin: 0;
+        opacity: 0.8;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        
+        .id-card-container, .id-card-container * {
+            visibility: visible;
+        }
+        
+        .id-card-container {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .no-print {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1>
+                    <i class="fas fa-id-card me-2"></i>Student ID Card
+                </h1>
+                <div class="no-print">
+                    <button onclick="window.print()" class="btn btn-primary me-2">
+                        <i class="fas fa-print me-1"></i>Print ID Card
+                    </button>
+                    <a href="{{ url_for('manage_students') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Students
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row justify-content-center">
+        <div class="col-auto">
+            <div class="id-card-container">
+                <div class="id-card">
+                    <div class="card-content">
+                        <div class="card-header">
+                            <h3 class="institution-name">Smart Attendance System</h3>
+                            <p class="card-title">Student Identity Card</p>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="photo-section">
+                                {% if student.photo_path %}
+                                    <img src="{{ url_for('static', filename='uploads/' + student.photo_path.split('/')[-1]) }}" 
+                                         alt="{{ student.full_name }}" class="student-photo">
+                                {% else %}
+                                    <div class="student-photo d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-user fa-2x"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="info-section">
+                                <h4 class="student-name">{{ student.full_name }}</h4>
+                                
+                                <div class="info-row">
+                                    <span class="info-label">ID:</span>
+                                    <span class="info-value">{{ student.student_id }}</span>
+                                </div>
+                                
+                                {% if student.course %}
+                                <div class="info-row">
+                                    <span class="info-label">Course:</span>
+                                    <span class="info-value">{{ student.course }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if student.year %}
+                                <div class="info-row">
+                                    <span class="info-label">Year:</span>
+                                    <span class="info-value">{{ student.year }}</span>
+                                </div>
+                                {% endif %}
+                                
+                                {% if student.section %}
+                                <div class="info-row">
+                                    <span class="info-label">Section:</span>
+                                    <span class="info-value">{{ student.section }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer">
+                            <p class="footer-text">Valid for Academic Year 2024-25</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4 no-print">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Student Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Student ID:</th>
+                                    <td>{{ student.student_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Full Name:</th>
+                                    <td>{{ student.full_name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td>{{ student.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Phone:</th>
+                                    <td>{{ student.phone or '-' }}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th width="30%">Course:</th>
+                                    <td>{{ student.course or '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Year:</th>
+                                    <td>{{ student.year or '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Section:</th>
+                                    <td>{{ student.section or '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Status:</th>
+                                    <td>
+                                        {% if student.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
