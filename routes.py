@@ -13,9 +13,8 @@ import json
 
 @app.route('/')
 def index():
-    if 'admin_id' in session:
-        return redirect(url_for('dashboard'))
-    return redirect(url_for('login'))
+    """Default route - show client interface for Raspberry Pi"""
+    return redirect(url_for('client'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -295,11 +294,14 @@ def delete_student(student_id):
     return redirect(url_for('manage_students'))
 
 # Initialize default admin user
-@app.before_first_request
 def create_default_admin():
-    if not Admin.query.first():
-        admin = Admin(username='admin')
-        admin.set_password('admin123')
-        db.session.add(admin)
-        db.session.commit()
-        print("Default admin created: username='admin', password='admin123'")
+    with app.app_context():
+        if not Admin.query.first():
+            admin = Admin(username='admin')
+            admin.set_password('admin123')
+            db.session.add(admin)
+            db.session.commit()
+            print("Default admin created: username='admin', password='admin123'")
+
+# Call the function to create default admin
+create_default_admin()

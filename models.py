@@ -45,7 +45,7 @@ class AttendanceRecord(db.Model):
     confidence = db.Column(db.Float)  # Face recognition confidence
     
     def __repr__(self):
-        return f'<AttendanceRecord {self.student.full_name} - {self.date}>'
+        return f'<AttendanceRecord {self.id} - {self.date}>'
 
 class SystemSettings(db.Model):
     id = db.Column(db.Integer, primary_key=True)
