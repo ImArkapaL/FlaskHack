@@ -43,6 +43,7 @@ class AttendanceRecord(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     date = db.Column(db.Date, default=datetime.utcnow().date)
     status = db.Column(db.String(20), default='present')  # present, absent, late
+    confidence = db.Column(db.Float)
     
     def __repr__(self):
         return f'<AttendanceRecord {self.id} - {self.date}>'

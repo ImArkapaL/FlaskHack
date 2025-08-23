@@ -144,7 +144,7 @@ class AttendanceClient {
     
     async sendImageToServer(imageData) {
         try {
-            const response = await fetch('/recognize_face', {
+            const response = await fetch('/api/recognize_face', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

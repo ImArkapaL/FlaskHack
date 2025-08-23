@@ -185,11 +185,11 @@ def statistics():
         AttendanceRecord.date >= start_date
     ).group_by(AttendanceRecord.date).all()
     
-    # Course-wise statistics
+    # Class-wise statistics
     course_stats = db.session.query(
-        Student.course,
+        Student.class_name,
         func.count(Student.id).label('count')
-    ).filter(Student.course.isnot(None)).group_by(Student.course).all()
+    ).filter(Student.class_name.isnot(None)).group_by(Student.class_name).all()
     
     return render_template('statistics.html', 
                          daily_stats=daily_stats,
