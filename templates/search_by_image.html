@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}Search by Image - Smart Attendance System{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-custom">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>Search Student by Image
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        Capture or upload an image to search for a student's ID card information.
+                    </p>
+                    
+                    <form method="POST">
+                        <!-- Camera Interface -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-camera me-1"></i>Capture Image
+                            </label>
+                            <div class="camera-section p-3 border rounded">
+                                <div class="video-container text-center mb-3">
+                                    <video id="searchVideo" width="300" height="225" autoplay playsinline class="border rounded"></video>
+                                    <canvas id="searchCanvas" style="display: none;"></canvas>
+                                </div>
+                                <div class="text-center">
+                                    <button type="button" id="captureSearchBtn" class="btn btn-primary me-2">
+                                        <i class="fas fa-camera me-1"></i>Capture Image
+                                    </button>
+                                    <button type="button" id="retakeSearchBtn" class="btn btn-outline-secondary" style="display: none;">
+                                        <i class="fas fa-redo me-1"></i>Retake
+                                    </button>
+                                </div>
+                                <div id="capturedSearchPreview" class="mt-3 text-center" style="display: none;">
+                                    <img id="capturedSearchPhoto" src="" alt="Captured" class="img-thumbnail" style="max-width: 200px;">
+                                </div>
+                                <input type="hidden" id="capturedSearchData" name="face_image_data">
+                            </div>
+                        </div>
+                        
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search me-1"></i>Search for Student
+                            </button>
+                            <a href="{{ url_for('manage_students') }}" class="btn btn-outline-secondary btn-lg ms-2">
+                                <i class="fas fa-arrow-left me-1"></i>Back to Students
+                            </a>
+                        </div>
+                    </form>
+                    
+                    {% if student %}
+                    <div class="mt-5">
+                        <h5>Search Result:</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-3 text-center">
+                                        {% if student.photo_path %}
+                                        <img src="{{ url_for('static', filename='uploads/' + student.photo_path.split('/')[-1]) }}" 
+                                             alt="{{ student.full_name }}" class="img-thumbnail" style="max-width: 120px;">
+                                        {% else %}
+                                        <div class="bg-secondary rounded d-flex align-items-center justify-content-center" 
+                                             style="width: 120px; height: 120px; margin: 0 auto;">
+                                            <i class="fas fa-user text-white fa-3x"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-9">
+                                        <h6><strong>{{ student.full_name }}</strong></h6>
+                                        <p class="mb-1"><strong>Student ID:</strong> {{ student.student_id }}</p>
+                                        <p class="mb-1"><strong>Class:</strong> {{ student.class_name }}</p>
+                                        <p class="mb-1"><strong>Section:</strong> {{ student.section }}</p>
+                                        {% if student.phone %}
+                                        <p class="mb-1"><strong>Phone:</strong> {{ student.phone }}</p>
+                                        {% endif %}
+                                        {% if student.father_name %}
+                                        <p class="mb-1"><strong>Father:</strong> {{ student.father_name }}</p>
+                                        {% endif %}
+                                        {% if student.mother_name %}
+                                        <p class="mb-1"><strong>Mother:</strong> {{ student.mother_name }}</p>
+                                        {% endif %}
+                                        
+                                        <div class="mt-3">
+                                            <a href="{{ url_for('generate_student_id_card', student_id=student.id) }}" 
+                                               class="btn btn-success btn-sm">
+                                                <i class="fas fa-id-card me-1"></i>View ID Card
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Camera handling for search
+let searchStream = null;
+let hasSearchCaptured = false;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSearchCamera();
+    
+    document.getElementById('captureSearchBtn').addEventListener('click', captureSearchPhoto);
+    document.getElementById('retakeSearchBtn').addEventListener('click', retakeSearchPhoto);
+});
+
+async function initializeSearchCamera() {
+    try {
+        searchStream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 300, height: 225 }
+        });
+        document.getElementById('searchVideo').srcObject = searchStream;
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        alert('Camera access denied. Please allow camera access to search by image.');
+    }
+}
+
+function captureSearchPhoto() {
+    const video = document.getElementById('searchVideo');
+    const canvas = document.getElementById('searchCanvas');
+    const context = canvas.getContext('2d');
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    context.drawImage(video, 0, 0);
+    
+    const imageData = canvas.toDataURL('image/jpeg', 0.8);
+    
+    // Display captured photo
+    document.getElementById('capturedSearchPhoto').src = imageData;
+    document.getElementById('capturedSearchPreview').style.display = 'block';
+    document.getElementById('capturedSearchData').value = imageData;
+    
+    // Hide video, show retake button
+    video.style.display = 'none';
+    document.getElementById('captureSearchBtn').style.display = 'none';
+    document.getElementById('retakeSearchBtn').style.display = 'inline-block';
+    
+    hasSearchCaptured = true;
+}
+
+function retakeSearchPhoto() {
+    const video = document.getElementById('searchVideo');
+    
+    // Show video, hide captured photo
+    video.style.display = 'block';
+    document.getElementById('capturedSearchPreview').style.display = 'none';
+    document.getElementById('captureSearchBtn').style.display = 'inline-block';
+    document.getElementById('retakeSearchBtn').style.display = 'none';
+    document.getElementById('capturedSearchData').value = '';
+    
+    hasSearchCaptured = false;
+}
+</script>
+{% endblock %}

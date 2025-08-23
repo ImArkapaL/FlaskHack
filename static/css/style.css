@@ -3,13 +3,14 @@
 /* Global Styles */
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    background-color: #f5f6fa;
+    color: #2c3e50;
 }
 
 /* Login Page Styles */
 .login-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,7 +47,7 @@ body {
 }
 
 .card-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
     border-radius: 12px 12px 0 0 !important;
     border: none;
@@ -61,14 +62,14 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     border: none;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
     transform: translateY(-1px);
-    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
 }
 
 /* Form Enhancements */
@@ -80,8 +81,8 @@ body {
 }
 
 .form-control:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    border-color: #2c3e50;
+    box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
 }
 
 .form-label {
@@ -97,7 +98,7 @@ body {
 }
 
 .table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: rgba(102, 126, 234, 0.05);
+    background-color: rgba(44, 62, 80, 0.05);
 }
 
 .table th {
@@ -119,7 +120,7 @@ body {
 /* Progress Bar Enhancements */
 .progress {
     border-radius: 10px;
-    background-color: rgba(102, 126, 234, 0.1);
+    background-color: rgba(44, 62, 80, 0.1);
 }
 
 .progress-bar {
@@ -131,21 +132,21 @@ body {
 .card.bg-success,
 .card.bg-info,
 .card.bg-warning {
-    background: linear-gradient(45deg, var(--bs-primary), var(--bs-primary-dark)) !important;
+    background: linear-gradient(45deg, #2c3e50, #34495e) !important;
     border: none;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
 .card.bg-success {
-    background: linear-gradient(45deg, #28a745, #20c997) !important;
+    background: linear-gradient(45deg, #27ae60, #2ecc71) !important;
 }
 
 .card.bg-info {
-    background: linear-gradient(45deg, #17a2b8, #6f42c1) !important;
+    background: linear-gradient(45deg, #3498db, #2980b9) !important;
 }
 
 .card.bg-warning {
-    background: linear-gradient(45deg, #ffc107, #fd7e14) !important;
+    background: linear-gradient(45deg, #f39c12, #e67e22) !important;
 }
 
 /* Alert Enhancements */
@@ -251,14 +252,14 @@ footer {
 
 /* Custom Utilities */
 .text-gradient {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
 }
 
 .shadow-custom {
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 10px 30px rgba(44, 62, 80, 0.15);
 }
 
 /* Empty State Styles */

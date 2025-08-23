@@ -1,7 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, send_file
 from app import app, db
 from models import Admin, Student, AttendanceRecord, SystemSettings
-from utils import save_face_encoding, recognize_face, generate_id_card, allowed_file
+from utils import save_face_encoding, save_face_encoding_from_data, recognize_face, generate_id_card, allowed_file, search_student_by_image
 import os
 import cv2
 import numpy as np
@@ -70,11 +70,12 @@ def register_student():
             student_id = request.form['student_id']
             first_name = request.form['first_name']
             last_name = request.form['last_name']
-            email = request.form['email']
             phone = request.form.get('phone', '')
-            course = request.form.get('course', '')
-            year = request.form.get('year', '')
-            section = request.form.get('section', '')
+            class_name = request.form['class_name']
+            section = request.form['section']
+            father_name = request.form.get('father_name', '')
+            mother_name = request.form.get('mother_name', '')
+            address = request.form.get('address', '')
             
             # Check if student already exists
             existing_student = Student.query.filter_by(student_id=student_id).first()
@@ -82,14 +83,10 @@ def register_student():
                 flash('Student ID already exists!', 'error')
                 return render_template('register_student.html')
             
-            # Handle face image upload
-            if 'face_image' not in request.files:
-                flash('No face image uploaded', 'error')
-                return render_template('register_student.html')
-            
-            file = request.files['face_image']
-            if file.filename == '' or not allowed_file(file.filename):
-                flash('Invalid file format. Please upload a valid image.', 'error')
+            # Handle face image data from camera
+            face_image_data = request.form.get('face_image_data')
+            if not face_image_data:
+                flash('No photo captured. Please capture a photo.', 'error')
                 return render_template('register_student.html')
             
             # Create new student
@@ -97,19 +94,20 @@ def register_student():
                 student_id=student_id,
                 first_name=first_name,
                 last_name=last_name,
-                email=email,
                 phone=phone,
-                course=course,
-                year=year,
-                section=section
+                class_name=class_name,
+                section=section,
+                father_name=father_name,
+                mother_name=mother_name,
+                address=address
             )
             
             # Save student to database first to get ID
             db.session.add(student)
             db.session.commit()
             
-            # Save face encoding
-            encoding_result = save_face_encoding(file, student.id)
+            # Save face encoding from camera data
+            encoding_result = save_face_encoding_from_data(face_image_data, student.id)
             if encoding_result['success']:
                 student.face_encoding_path = encoding_result['encoding_path']
                 student.photo_path = encoding_result['photo_path']
@@ -120,7 +118,7 @@ def register_student():
                 # Remove student if face encoding failed
                 db.session.delete(student)
                 db.session.commit()
-                flash(f'Face encoding failed: {encoding_result["message"]}', 'error')
+                flash(f'Photo processing failed: {encoding_result["message"]}', 'error')
                 
         except Exception as e:
             db.session.rollback()
@@ -139,7 +137,7 @@ def manage_students():
             (Student.first_name.contains(search)) |
             (Student.last_name.contains(search)) |
             (Student.student_id.contains(search)) |
-            (Student.email.contains(search))
+            (Student.class_name.contains(search))
         ).all()
     else:
         students = Student.query.all()
@@ -261,6 +259,38 @@ def api_recognize_face():
     except Exception as e:
         app.logger.error(f"Face recognition error: {str(e)}")
         return jsonify({'success': False, 'message': 'Recognition failed'})
+
+@app.route('/search_by_image', methods=['GET', 'POST'])
+def search_by_image():
+    """Search for student ID card using uploaded image"""
+    if 'admin_id' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'GET':
+        return render_template('search_by_image.html')
+    
+    try:
+        # Get image data from form
+        face_image_data = request.form.get('face_image_data')
+        if not face_image_data:
+            flash('No image captured. Please capture an image.', 'error')
+            return render_template('search_by_image.html')
+        
+        # Process image and search for matching student
+        result = search_student_by_image(face_image_data)
+        
+        if result['success'] and result['student']:
+            student = result['student']
+            flash(f'Student found: {student.full_name} (ID: {student.student_id})', 'success')
+            return render_template('search_by_image.html', student=student)
+        else:
+            flash(result.get('message', 'No matching student found.'), 'warning')
+            return render_template('search_by_image.html')
+            
+    except Exception as e:
+        app.logger.error(f"Error in image search: {str(e)}")
+        flash('Error processing image. Please try again.', 'error')
+        return render_template('search_by_image.html')
 
 @app.route('/generate_id_card/<int:student_id>')
 def generate_student_id_card(student_id):

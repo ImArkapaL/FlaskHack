@@ -19,11 +19,12 @@ class Student(db.Model):
     student_id = db.Column(db.String(20), unique=True, nullable=False)
     first_name = db.Column(db.String(50), nullable=False)
     last_name = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
     phone = db.Column(db.String(20))
-    course = db.Column(db.String(100))
-    year = db.Column(db.String(10))
-    section = db.Column(db.String(10))
+    class_name = db.Column(db.String(20), nullable=False)
+    section = db.Column(db.String(10), nullable=False)
+    father_name = db.Column(db.String(100))
+    mother_name = db.Column(db.String(100))
+    address = db.Column(db.Text)
     face_encoding_path = db.Column(db.String(255))
     photo_path = db.Column(db.String(255))
     is_active = db.Column(db.Boolean, default=True)
@@ -42,7 +43,6 @@ class AttendanceRecord(db.Model):
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     date = db.Column(db.Date, default=datetime.utcnow().date)
     status = db.Column(db.String(20), default='present')  # present, absent, late
-    confidence = db.Column(db.Float)  # Face recognition confidence
     
     def __repr__(self):
         return f'<AttendanceRecord {self.id} - {self.date}>'

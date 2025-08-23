@@ -42,10 +42,9 @@
                                 <th>Photo</th>
                                 <th>Student ID</th>
                                 <th>Name</th>
-                                <th>Course</th>
+                                <th>Class</th>
                                 <th>Check-in Time</th>
                                 <th>Status</th>
-                                <th>Confidence</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -67,7 +66,7 @@
                                     <strong>{{ record.student.student_id }}</strong>
                                 </td>
                                 <td>{{ record.student.full_name }}</td>
-                                <td>{{ record.student.course or '-' }}</td>
+                                <td>{{ record.student.class_name or '-' }}</td>
                                 <td>
                                     <i class="fas fa-clock text-muted me-1"></i>
                                     {{ record.timestamp.strftime('%H:%M:%S') }}
@@ -85,19 +84,6 @@
                                         <span class="badge bg-danger">
                                             <i class="fas fa-times me-1"></i>Absent
                                         </span>
-                                    {% endif %}
-                                </td>
-                                <td>
-                                    {% if record.confidence %}
-                                        <div class="d-flex align-items-center">
-                                            <div class="progress me-2" style="width: 60px; height: 8px;">
-                                                <div class="progress-bar bg-success" 
-                                                     style="width: {{ record.confidence * 100 }}%"></div>
-                                            </div>
-                                            <small class="text-muted">{{ "%.1f"|format(record.confidence * 100) }}%</small>
-                                        </div>
-                                    {% else %}
-                                        <span class="badge bg-secondary">N/A</span>
                                     {% endif %}
                                 </td>
                             </tr>
@@ -126,19 +112,11 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-6">
             <div class="card bg-info text-white">
                 <div class="card-body text-center">
-                    <h3>{{ attendance_records|selectattr("confidence")|list|length }}</h3>
-                    <p class="mb-0">Face Recognition</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card bg-warning text-white">
-                <div class="card-body text-center">
-                    <h3>{{ "%.1f"|format((attendance_records|selectattr("confidence")|map(attribute="confidence")|sum / attendance_records|selectattr("confidence")|list|length * 100) if attendance_records|selectattr("confidence")|list|length > 0 else 0) }}%</h3>
-                    <p class="mb-0">Avg. Confidence</p>
+                    <h3>{{ attendance_records|selectattr("status", "equalto", "present")|list|length }}</h3>
+                    <p class="mb-0">Present Students</p>
                 </div>
             </div>
         </div>

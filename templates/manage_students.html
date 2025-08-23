@@ -22,7 +22,7 @@
         <div class="col-md-6">
             <form method="GET" class="d-flex">
                 <input type="text" class="form-control me-2" name="search" 
-                       placeholder="Search by name, ID, or email..." value="{{ search }}">
+                       placeholder="Search by name, ID, or class..." value="{{ search }}">
                 <button type="submit" class="btn btn-outline-primary">
                     <i class="fas fa-search"></i>
                 </button>
@@ -49,10 +49,10 @@
                                 <th>Photo</th>
                                 <th>Student ID</th>
                                 <th>Name</th>
-                                <th>Email</th>
-                                <th>Course</th>
-                                <th>Year</th>
+                                <th>Phone</th>
+                                <th>Class</th>
                                 <th>Section</th>
+                                <th>Parent Details</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -77,11 +77,16 @@
                                 </td>
                                 <td>{{ student.full_name }}</td>
                                 <td>
-                                    <small>{{ student.email }}</small>
+                                    <small>{{ student.phone or '-' }}</small>
                                 </td>
-                                <td>{{ student.course or '-' }}</td>
-                                <td>{{ student.year or '-' }}</td>
+                                <td>{{ student.class_name or '-' }}</td>
                                 <td>{{ student.section or '-' }}</td>
+                                <td>
+                                    <small>
+                                        {% if student.father_name %}<strong>Father:</strong> {{ student.father_name }}<br>{% endif %}
+                                        {% if student.mother_name %}<strong>Mother:</strong> {{ student.mother_name }}{% endif %}
+                                    </small>
+                                </td>
                                 <td>
                                     {% if student.is_active %}
                                         <span class="badge bg-success">Active</span>

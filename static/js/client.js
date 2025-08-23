@@ -52,12 +52,19 @@ class AttendanceClient {
             }
         });
         
-        // Auto-capture every 5 seconds if enabled
-        // setInterval(() => {
-        //     if (!this.isProcessing) {
-        //         this.captureAndRecognize();
-        //     }
-        // }, 5000);
+        // Enable automatic capture every 3 seconds
+        setInterval(() => {
+            if (!this.isProcessing) {
+                this.captureAndRecognize();
+            }
+        }, 3000);
+        
+        // Initial automatic capture after 2 seconds
+        setTimeout(() => {
+            if (!this.isProcessing) {
+                this.captureAndRecognize();
+            }
+        }, 2000);
     }
     
     async captureAndRecognize() {
@@ -92,24 +99,25 @@ class AttendanceClient {
                     }, 2000);
                 }
                 
-                // Auto-reset after 5 seconds
+                // Auto-reset after 6 seconds for successful recognition
                 setTimeout(() => {
                     this.resetInterface();
-                }, 5000);
+                }, 6000);
                 
             } else {
-                this.showStatus(result.message || 'Face not recognized. Please try again.', 'error');
+                // Don't show error for scanning - just keep scanning silently
+                this.showStatus('Scanning for faces...', 'info');
                 setTimeout(() => {
                     this.resetInterface();
-                }, 3000);
+                }, 1000);
             }
             
         } catch (error) {
             console.error('Recognition error:', error);
-            this.showStatus('Recognition failed. Please try again.', 'error');
+            this.showStatus('Scanning...', 'info');
             setTimeout(() => {
                 this.resetInterface();
-            }, 3000);
+            }, 1000);
         }
     }
     
@@ -136,7 +144,7 @@ class AttendanceClient {
     
     async sendImageToServer(imageData) {
         try {
-            const response = await fetch('/api/recognize_face', {
+            const response = await fetch('/recognize_face', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
