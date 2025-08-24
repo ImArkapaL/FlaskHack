@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, send_file
-from api.app import app, db
+from app import app, db
 from models import Admin, Student, AttendanceRecord, SystemSettings
 from utils import save_face_encoding, save_face_encoding_from_data, recognize_face, generate_id_card, allowed_file, search_student_by_image
 import os
