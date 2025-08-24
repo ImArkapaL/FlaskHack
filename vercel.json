@@ -1,1 +1,1 @@
-{"version":2,"functions":{"api/app.py":{"runtime":"vercel-python@3.9","maxDuration":30,"memory":1024}},"routes":[{"src":"/(.*)","dest":"api/app.py"}]}
+{"builds":[{"src":"api/app.py","use":"@vercel/python","config":{"runtime":"python3.9"}}],"routes":[{"src":"/(.*)","dest":"api/app.py"}]}
