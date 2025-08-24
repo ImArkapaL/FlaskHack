@@ -1,285 +1,291 @@
-{% extends "base.html" %}
-
-{% block title %}ID Card - {{ student.full_name }}{% endblock %}
-
-{% block extra_head %}
-<style>
-    .id-card {
-        width: 350px;
-        height: 220px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 15px;
-        padding: 20px;
-        color: white;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        position: relative;
-        overflow: hidden;
-        font-family: 'Arial', sans-serif;
-    }
-    
-    .id-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 100%;
-        height: 100%;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        z-index: 1;
-    }
-    
-    .card-content {
-        position: relative;
-        z-index: 2;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .card-header {
-        text-align: center;
-        margin-bottom: 15px;
-    }
-    
-    .institution-name {
-        font-size: 14px;
-        font-weight: bold;
-        margin: 0;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .card-title {
-        font-size: 11px;
-        margin: 2px 0 0 0;
-        opacity: 0.9;
-    }
-    
-    .card-body {
-        display: flex;
-        flex: 1;
-        gap: 15px;
-    }
-    
-    .photo-section {
-        flex-shrink: 0;
-    }
-    
-    .student-photo {
-        width: 70px;
-        height: 70px;
-        border-radius: 8px;
-        border: 2px solid rgba(255, 255, 255, 0.8);
-        object-fit: cover;
-        background: rgba(255, 255, 255, 0.2);
-    }
-    
-    .info-section {
-        flex: 1;
-        font-size: 12px;
-    }
-    
-    .student-name {
-        font-size: 16px;
-        font-weight: bold;
-        margin: 0 0 8px 0;
-        line-height: 1.2;
-    }
-    
-    .info-row {
-        margin-bottom: 4px;
-        display: flex;
-        justify-content: space-between;
-    }
-    
-    .info-label {
-        font-weight: 600;
-        opacity: 0.9;
-    }
-    
-    .info-value {
-        opacity: 0.8;
-    }
-    
-    .card-footer {
-        text-align: center;
-        border-top: 1px solid rgba(255, 255, 255, 0.3);
-        padding-top: 8px;
-        margin-top: 10px;
-    }
-    
-    .footer-text {
-        font-size: 10px;
-        margin: 0;
-        opacity: 0.8;
-    }
-    
-    @media print {
-        body * {
-            visibility: hidden;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student ID Card</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600,700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            font-family: 'Montserrat', Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
-        
-        .id-card-container, .id-card-container * {
-            visibility: visible;
+        .id-card-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: #f4f6fb;
         }
-        
-        .id-card-container {
+        .id-card {
+            background: linear-gradient(120deg, #f8fafc 0%, #e9f0fb 100%);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
+            width: 390px;
+            padding: 0;
+            position: relative;
+            overflow: hidden;
+            border: 2.5px solid #2d3e50;
+        }
+        .id-header {
+            background: linear-gradient(90deg, #4e73df 0%, #375a9e 100%);
+            color: #fff;
+            padding: 22px 28px 16px 28px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        .school-logo {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            border-radius: 12px;
+            background: #fff;
+            border: 2px solid #fff;
+        }
+        .school-details {
+            flex: 1;
+        }
+        .school-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+        .school-address {
+            font-size: 1.02rem;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+        .id-main {
+            padding: 22px 28px 16px 28px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .student-photo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #4e73df;
+            margin-bottom: 16px;
+            background: #eaf0fb;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+        }
+        .student-details {
+            width: 100%;
+            margin-bottom: 14px;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 9px;
+        }
+        .detail-label {
+            font-size: 1.02rem;
+            color: #4e73df;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .detail-value {
+            font-size: 0.97rem;
+            color: #2d3e50;
+            font-weight: 500;
+            text-align: right;
+            max-width: 180px;
+            overflow-wrap: break-word;
+            white-space: pre-line;
+        }
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 16px 0 10px 0;
+        }
+        .qr-label {
+            font-size: 0.89rem;
+            color: #7b8a8b;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+        .qr-code {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto;
+            display: block;
+            /* Remove border */
+            border: none;
+            background: none;
+        }
+        .print-btn {
             position: absolute;
-            left: 50%;
-            top: 50%;
-            transform: translate(-50%, -50%);
+            top: 18px;
+            right: 18px;
+            width: auto;
+            margin-top: 0;
+            font-size: 1rem;
+            padding: 7px 16px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 10;
         }
-        
-        .no-print {
-            display: none !important;
+        .id-card {
+            border: 2px solid #1976d2;
+            border-radius: 18px 18px 18px 18px;
+            box-shadow: 0 4px 24px rgba(44, 62, 80, 0.10);
+            background: #fff;
+            position: relative;
+            margin-top: 48px;
+            padding-top: 0;
         }
-    }
-</style>
-{% endblock %}
+        .id-card-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 0;
+        }
+        .print-btn {
+            position: absolute;
+            top: 0;
+            right: 0;
+            margin: 16px 24px;
+            z-index: 10;
+            border-radius: 24px;
+            border: none;
+            background: #1976d2;
+            color: #fff;
+            font-family: 'Montserrat', Arial, sans-serif;
+            font-size: 1rem;
+            padding: 7px 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.10);
+            transition: background 0.2s;
+        }
+        .print-btn:hover {
+            background: #1565c0;
+        }
+        @media print {
+            body {
+                margin: 0;
+                padding: 0;
+                background: #fff;
+            }
+            .id-card-wrapper {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100vw;
+                height: 100vh;
+                padding: 0;
+                margin: 0;
+            }
+            .id-card {
+                box-shadow: none;
+                border: 2px solid #1976d2;
+                border-radius: 18px;
+                margin: 0 auto;
+                position: static;
+                width: 350px;
+                height: auto;
+                background: #fff;
+            }
+            .print-btn, .school-logo, .validity {
+                display: none !important;
+            }
+            body * {
+                visibility: hidden;
+            }
+            .id-card, .id-card * {
+                visibility: visible;
+            }
 
-{% block content %}
-<div class="container mt-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1>
-                    <i class="fas fa-id-card me-2"></i>Student ID Card
-                </h1>
-                <div class="no-print">
-                    <button onclick="window.print()" class="btn btn-primary me-2">
-                        <i class="fas fa-print me-1"></i>Print ID Card
-                    </button>
-                    <a href="{{ url_for('manage_students') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-1"></i>Back to Students
-                    </a>
+            .school-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: black;
+            text-shadow: 0 2px 8px rgba(44,62,80,0.08);
+            }
+        /* Remove borders from QR code and other elements if present */
+        .qr-code {
+            border: none;
+            background: none;
+        }
+        .print-btn {
+            position: absolute;
+            top: 18px;
+            right: 18px;
+            width: auto;
+            margin-top: 0;
+            font-size: 1rem;
+            padding: 7px 16px;
+            background: #1976d2;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            z-index: 10;
+        }
+        @media print {
+            .print-btn {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="id-card-wrapper">
+        <button class="print-btn" onclick="window.print()">Print</button>
+        <div class="id-card">
+            <div class="id-header">
+                <img src="{{ url_for('static', filename='image/ico.png') }}" alt="School Logo" class="school-logo">
+                <div class="school-details">
+                    <div class="school-name">Kendriya Vidyalaya</div>
+                    <div class="school-address">Sector 1, City, State, ZIP</div>
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="row justify-content-center">
-        <div class="col-auto">
-            <div class="id-card-container">
-                <div class="id-card">
-                    <div class="card-content">
-                        <div class="card-header">
-                            <h3 class="institution-name">Smart Attendance System</h3>
-                            <p class="card-title">Student Identity Card</p>
-                        </div>
-                        
-                        <div class="card-body">
-                            <div class="photo-section">
-                                {% if student.photo_path %}
-                                    <img src="{{ url_for('static', filename='uploads/' + student.photo_path.split('/')[-1]) }}" 
-                                         alt="{{ student.full_name }}" class="student-photo">
-                                {% else %}
-                                    <div class="student-photo d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-user fa-2x"></i>
-                                    </div>
-                                {% endif %}
-                            </div>
-                            
-                            <div class="info-section">
-                                <h4 class="student-name">{{ student.full_name }}</h4>
-                                
-                                <div class="info-row">
-                                    <span class="info-label">ID:</span>
-                                    <span class="info-value">{{ student.student_id }}</span>
-                                </div>
-                                
-                                {% if student.course %}
-                                <div class="info-row">
-                                    <span class="info-label">Course:</span>
-                                    <span class="info-value">{{ student.course }}</span>
-                                </div>
-                                {% endif %}
-                                
-                                {% if student.year %}
-                                <div class="info-row">
-                                    <span class="info-label">Year:</span>
-                                    <span class="info-value">{{ student.year }}</span>
-                                </div>
-                                {% endif %}
-                                
-                                {% if student.section %}
-                                <div class="info-row">
-                                    <span class="info-label">Section:</span>
-                                    <span class="info-value">{{ student.section }}</span>
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                        
-                        <div class="card-footer">
-                            <p class="footer-text">Valid for Academic Year 2024-25</p>
-                        </div>
+            <div class="id-main">
+                <img src="{{ url_for('static', filename=student.photo_path) }}" alt="Student Photo" class="student-photo">
+                <div class="student-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Name:</span>
+                        <span class="detail-value">{{ student.full_name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Student ID:</span>
+                        <span class="detail-value">{{ student.student_id }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Class:</span>
+                        <span class="detail-value">{{ student.class_name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date of Birth:</span>
+                        <span class="detail-value">{{ student.dob }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Address:</span>
+                        <span class="detail-value" style="font-size: 0.85rem;">{{ student.address }}</span>
                     </div>
                 </div>
+                <div class="qr-section">
+                    <span class="qr-label">Scan for Student Info</span>
+                    <img class="qr-code" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data={{ student.student_id }}%20{{ student.full_name }}%20{{ student.class_name }}%20{{ student.dob }}%20{{ student.address }}" alt="QR Code">
+                </div>
+                <div class="validity">Valid for Academic Year 2024-2025</div>
             </div>
         </div>
     </div>
-    
-    <div class="row mt-4 no-print">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Student Information
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="30%">Student ID:</th>
-                                    <td>{{ student.student_id }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Full Name:</th>
-                                    <td>{{ student.full_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Email:</th>
-                                    <td>{{ student.email }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Phone:</th>
-                                    <td>{{ student.phone or '-' }}</td>
-                                </tr>
-                            </table>
-                        </div>
-                        <div class="col-md-6">
-                            <table class="table table-borderless">
-                                <tr>
-                                    <th width="30%">Course:</th>
-                                    <td>{{ student.course or '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Year:</th>
-                                    <td>{{ student.year or '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Section:</th>
-                                    <td>{{ student.section or '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <th>Status:</th>
-                                    <td>
-                                        {% if student.is_active %}
-                                            <span class="badge bg-success">Active</span>
-                                        {% else %}
-                                            <span class="badge bg-danger">Inactive</span>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
+</body>
+</html>

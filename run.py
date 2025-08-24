@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
 """
 Face Recognition Attendance System
 Run this file to start the application
 """
-
 if __name__ == '__main__':
-    from app import app
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    from api.app import app
+    from waitress import serve
+    serve(app, host='192.168.1.34', port=8000)

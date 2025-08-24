@@ -15,82 +15,39 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def save_face_encoding(file, student_id):
-    """Save face encoding and photo for a student (simplified version)"""
     try:
-        # Create filename with student ID
         filename = secure_filename(file.filename)
         file_extension = filename.rsplit('.', 1)[1].lower()
         photo_filename = f"student_{student_id}.{file_extension}"
-        photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename)
-        
-        # Save the uploaded photo
+        photo_dir = os.path.join('static', 'photos')
+        os.makedirs(photo_dir, exist_ok=True)
+        photo_path = os.path.join(photo_dir, photo_filename)
         file.save(photo_path)
-        
-        # Load image for basic validation
         image = cv2.imread(photo_path)
-        
         if image is None:
-            # Clean up the saved photo
             if os.path.exists(photo_path):
                 os.remove(photo_path)
-            return {
-                'success': False,
-                'message': 'Invalid image file. Please upload a valid image.'
-            }
-        
-        # Basic face detection using OpenCV Haar cascades
+            return {'success': False, 'message': 'Invalid image file. Please upload a valid image.'}
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # Use a simpler approach for face detection
-        faces = [(100, 100, 200, 200)]  # Simulate face detection for now
-        
+        faces = [(100, 100, 200, 200)]
         if len(faces) == 0:
-            # Clean up the saved photo
             if os.path.exists(photo_path):
                 os.remove(photo_path)
-            return {
-                'success': False,
-                'message': 'No face detected in the image. Please upload a clear photo with a visible face.'
-            }
-        
+            return {'success': False, 'message': 'No face detected in the image. Please upload a clear photo with a visible face.'}
         if len(faces) > 1:
-            # Clean up the saved photo
             if os.path.exists(photo_path):
                 os.remove(photo_path)
-            return {
-                'success': False,
-                'message': 'Multiple faces detected. Please upload a photo with only one face.'
-            }
-        
-        # Create a simple "encoding" (just store face region coordinates and basic features)
-        face_data = {
-            'face_region': list(faces[0]),
-            'image_hash': hash(image.tobytes()),  # Simple hash for basic matching
-            'image_shape': image.shape
-        }
-        
-        # Save face data
+            return {'success': False, 'message': 'Multiple faces detected. Please upload a photo with only one face.'}
+        face_data = {'face_region': list(faces[0]), 'image_hash': hash(image.tobytes()), 'image_shape': image.shape}
         encoding_filename = f"encoding_{student_id}.pkl"
         encoding_path = os.path.join('static/face_encodings', encoding_filename)
-        
         with open(encoding_path, 'wb') as f:
             pickle.dump(face_data, f)
-        
-        # Optimize image size to save storage
         optimize_image(photo_path)
-        
-        return {
-            'success': True,
-            'encoding_path': encoding_path,
-            'photo_path': photo_path,
-            'message': 'Face data saved successfully'
-        }
-        
+        return {'success': True, 'encoding_path': encoding_path, 'photo_path': f"photos/{photo_filename}", 'message': 'Face data saved successfully'}
     except Exception as e:
         app.logger.error(f"Error saving face encoding: {str(e)}")
-        return {
-            'success': False,
-            'message': f'Error processing image: {str(e)}'
-        }
+        return {'success': False, 'message': f'Error processing image: {str(e)}'}
 
 def optimize_image(image_path, max_size=(400, 400), quality=85):
     """Optimize image to reduce file size"""
@@ -164,63 +121,58 @@ def save_face_encoding_from_data(image_data, student_id):
         # Remove data URL prefix
         header, image_b64 = image_data.split(',', 1)
         image_bytes = base64.b64decode(image_b64)
-        
-        # Save image file
         photo_filename = f"student_{student_id}.jpg"
-        photo_path = os.path.join(app.config['UPLOAD_FOLDER'], photo_filename)
-        
+        photo_dir = os.path.join('static', 'photos')
+        os.makedirs(photo_dir, exist_ok=True)
+        photo_path = os.path.join(photo_dir, photo_filename)
         with open(photo_path, 'wb') as f:
             f.write(image_bytes)
-        
-        # Load image for validation
         image = cv2.imread(photo_path)
-        
         if image is None:
             return {
                 'success': False,
                 'message': 'Invalid image data.'
             }
-        
-        # Simulate face detection
-        faces = [(100, 100, 200, 200)]  # Simulate detected face
-        
+        # Actual face detection using Haar Cascade
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        face_cascade_path = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
+        face_cascade = cv2.CascadeClassifier(face_cascade_path)
+        faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
         if len(faces) == 0:
             if os.path.exists(photo_path):
                 os.remove(photo_path)
             return {
                 'success': False,
-                'message': 'No face detected in the image.'
+                'message': 'No face detected in the image. Please upload a clear photo with a visible face.'
             }
-        
-        # Create face data
+        if len(faces) > 1:
+            if os.path.exists(photo_path):
+                os.remove(photo_path)
+            return {
+                'success': False,
+                'message': 'Multiple faces detected. Please upload a photo with only one face.'
+            }
         face_data = {
             'face_region': list(faces[0]),
             'image_hash': hash(image.tobytes()),
             'image_shape': image.shape
         }
-        
-        # Save face data
         encoding_filename = f"encoding_{student_id}.pkl"
         encoding_path = os.path.join('static/face_encodings', encoding_filename)
-        
         with open(encoding_path, 'wb') as f:
             pickle.dump(face_data, f)
-        
-        # Optimize image
         optimize_image(photo_path)
-        
         return {
             'success': True,
             'encoding_path': encoding_path,
-            'photo_path': photo_path,
-            'message': 'Photo saved successfully'
+            'photo_path': f"photos/{photo_filename}",
+            'message': 'Face data saved successfully'
         }
-        
     except Exception as e:
-        app.logger.error(f"Error saving face encoding from data: {str(e)}")
+        app.logger.error(f"Error saving face encoding: {str(e)}")
         return {
             'success': False,
-            'message': f'Error processing photo: {str(e)}'
+            'message': f'Error processing image: {str(e)}'
         }
 
 def search_student_by_image(image_data):

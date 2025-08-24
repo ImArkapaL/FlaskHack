@@ -3,6 +3,7 @@ import logging
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -32,6 +33,7 @@ app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Initialize the app with the extension
 db.init_app(app)
+migrate = Migrate(app, db)
 
 # Create uploads directory if it doesn't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

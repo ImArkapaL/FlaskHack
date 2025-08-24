@@ -1,5 +1,5 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify, send_file
-from app import app, db
+from api.app import app, db
 from models import Admin, Student, AttendanceRecord, SystemSettings
 from utils import save_face_encoding, save_face_encoding_from_data, recognize_face, generate_id_card, allowed_file, search_student_by_image
 import os
@@ -202,60 +202,39 @@ def client():
 
 @app.route('/api/recognize_face', methods=['POST'])
 def api_recognize_face():
-    """API endpoint for face recognition from client"""
     try:
         data = request.get_json()
         if not data or 'image' not in data:
             return jsonify({'success': False, 'message': 'No image data provided'})
-        
-        # Decode base64 image
         image_data = base64.b64decode(data['image'].split(',')[1])
         image = Image.open(BytesIO(image_data))
-        
-        # Convert PIL image to OpenCV format
         image_array = np.array(image)
         if len(image_array.shape) == 3:
             image_array = cv2.cvtColor(image_array, cv2.COLOR_RGB2BGR)
-        
-        # Recognize face
         result = recognize_face(image_array)
-        
         if result['success']:
             student = Student.query.get(result['student_id'])
             if student:
-                # Check if already marked today
-                today_record = AttendanceRecord.query.filter_by(
-                    student_id=student.id,
-                    date=date.today()
-                ).first()
-                
+                today_record = AttendanceRecord.query.filter_by(student_id=student.id, date=date.today()).first()
                 if not today_record:
-                    # Mark attendance
-                    attendance = AttendanceRecord(
-                        student_id=student.id,
-                        confidence=result['confidence']
-                    )
+                    attendance = AttendanceRecord(student_id=student.id, confidence=result['confidence'])
                     db.session.add(attendance)
                     db.session.commit()
-                    
-                    return jsonify({
-                        'success': True,
-                        'message': f'Welcome {student.full_name}! Attendance marked.',
-                        'student_name': student.full_name,
-                        'student_id': student.student_id,
-                        'already_marked': False
-                    })
+                    # Delete attendance photo after marking
+                    if hasattr(attendance, 'photo_path') and attendance.photo_path:
+                        import os
+                        try:
+                            if os.path.exists(attendance.photo_path):
+                                os.remove(attendance.photo_path)
+                                attendance.photo_path = None
+                                db.session.commit()
+                        except Exception as e:
+                            app.logger.error(f"Failed to delete attendance photo: {str(e)}")
+                    return jsonify({'success': True, 'message': f'Welcome {student.full_name}! Attendance marked.', 'student_name': student.full_name, 'student_id': student.student_id, 'already_marked': False})
                 else:
-                    return jsonify({
-                        'success': True,
-                        'message': f'Welcome {student.full_name}! Already marked today.',
-                        'student_name': student.full_name,
-                        'student_id': student.student_id,
-                        'already_marked': True
-                    })
-        
+                    # Suppress all feedback if already marked
+                    return jsonify({'success': True, 'message': '', 'student_name': '', 'student_id': '', 'already_marked': True})
         return jsonify({'success': False, 'message': 'Face not recognized'})
-        
     except Exception as e:
         app.logger.error(f"Face recognition error: {str(e)}")
         return jsonify({'success': False, 'message': 'Recognition failed'})

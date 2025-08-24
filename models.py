@@ -1,4 +1,4 @@
-from app import db
+from api.app import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -30,7 +30,6 @@ class Student(db.Model):
     is_active = db.Column(db.Boolean, default=True)
     registered_at = db.Column(db.DateTime, default=datetime.utcnow)
     
-    # Relationship with attendance records
     attendance_records = db.relationship('AttendanceRecord', backref='student', lazy=True)
     
     @property
@@ -40,10 +39,11 @@ class Student(db.Model):
 class AttendanceRecord(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    date = db.Column(db.Date, default=datetime.utcnow().date)
-    status = db.Column(db.String(20), default='present')  # present, absent, late
+    timestamp = db.Column(db.DateTime, default=datetime.now)
+    date = db.Column(db.Date, default=datetime.now().date)
+    status = db.Column(db.String(20), default='present')
     confidence = db.Column(db.Float)
+    photo_path = db.Column(db.String(255))
     
     def __repr__(self):
         return f'<AttendanceRecord {self.id} - {self.date}>'

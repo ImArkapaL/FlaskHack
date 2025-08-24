@@ -24,18 +24,30 @@ class CameraManager {
     }
     
     async requestCameraPermission() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            throw new Error('Camera API not supported');
+        }
         try {
-            // Check if camera is available
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const videoDevices = devices.filter(device => device.kind === 'videoinput');
-            
-            if (videoDevices.length === 0) {
-                throw new Error('No camera devices found');
-            }
-            
-            return true;
+            this.stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    width: { ideal: 640, max: 1280 },
+                    height: { ideal: 480, max: 720 },
+                    frameRate: { ideal: 30, max: 60 },
+                    facingMode: 'user'
+                },
+                audio: false
+            });
+            this.video.srcObject = this.stream;
+            return new Promise((resolve, reject) => {
+                this.video.onloadedmetadata = () => {
+                    this.video.play();
+                    resolve();
+                };
+            });
         } catch (error) {
-            throw new Error('Camera permission denied or not available');
+            // Show a clear message to the user if permission is denied
+            alert(handleCameraError(error));
+            throw error;
         }
     }
     
